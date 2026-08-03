@@ -1,0 +1,12 @@
+name = "nyanc"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# 아래 id는 실제로 만든 KV namespace id로 교체하세요.
+# 만드는 법: wrangler kv namespace create "LINKS"
+[[kv_namespaces]]
+binding = "LINKS"
+id = "여기에_실제_KV_namespace_id_입력"
+
+# Safe Browsing API 키는 여기 적지 말고 아래 명령어로 secret 등록:
+# wrangler secret put SAFE_BROWSING_API_KEY
