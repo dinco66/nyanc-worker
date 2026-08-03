@@ -31,6 +31,15 @@ function isValidUrl(str) {
   }
 }
 
+// 미리보기 이미지는 외부 URL이거나, 앱에서 업로드한 base64 데이터(data:image/...)일 수 있음
+function isValidImageValue(str) {
+  if (!str) return false;
+  if (str.startsWith("data:image/")) {
+    return str.length < 2_000_000; // 약 1.5MB 이하로 제한 (KV 저장 용량 보호)
+  }
+  return isValidUrl(str);
+}
+
 function todayStr() {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
 }
@@ -159,7 +168,7 @@ export default {
       if (!isValidUrl(longUrl)) {
         return json({ error: "올바른 URL이 아닙니다. (http:// 또는 https://로 시작해야 함)", code: "invalid_url" }, 400);
       }
-      if (ogImage && !isValidUrl(ogImage)) {
+      if (ogImage && !isValidImageValue(ogImage)) {
         return json({ error: "미리보기 이미지 주소가 올바르지 않습니다.", code: "invalid_og_image" }, 400);
       }
       if (expiresAt && isNaN(Date.parse(expiresAt))) {
@@ -262,7 +271,7 @@ export default {
       if (payload.ogDescription !== undefined) record.ogDescription = (payload.ogDescription || "").trim().slice(0, 200) || null;
       if (payload.ogImage !== undefined) {
         const img = (payload.ogImage || "").trim();
-        if (img && !isValidUrl(img)) return json({ error: "미리보기 이미지 주소가 올바르지 않습니다.", code: "invalid_og_image" }, 400);
+        if (img && !isValidImageValue(img)) return json({ error: "미리보기 이미지 주소가 올바르지 않습니다.", code: "invalid_og_image" }, 400);
         record.ogImage = img || null;
       }
       if (payload.expiresAt !== undefined) {
